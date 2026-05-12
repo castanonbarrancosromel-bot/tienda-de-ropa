@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PoloMamá | Polos Personalizados Día de la Madre</title>
+  <meta name="description" content="Regala amor con nuestros polos personalizados para el Día de la Madre. Diseños únicos, calidad premium en Bolivia. ¡El regalo perfecto para Mamá!" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream:    '#FAF6F0',
+            'rose-quartz': '#B5838D',
+            'rose-gold': '#C9956C',
+            'rose-light': '#F4D0D6',
+            'rose-dark': '#8B5E6A',
+            'gold':     '#C9956C',
+            'gold-light':'#E8C4A0',
+          },
+          fontFamily: {
+            playfair: ['"Playfair Display"', 'serif'],
+            mont:     ['Montserrat', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-cream font-mont text-gray-800 overflow-x-hidden">
+
+  <!-- ═══════════════ NAVBAR ═══════════════ -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 py-4 px-6 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl">🌸</span>
+      <span class="font-playfair text-xl font-bold tracking-wide text-white drop-shadow" id="nav-brand">PoloMamá</span>
+    </div>
+    <ul class="hidden md:flex items-center gap-8 text-sm font-medium text-white drop-shadow">
+      <li><a href="#hero"     class="nav-link hover:text-gold-light transition-colors">Inicio</a></li>
+      <li><a href="#gallery"  class="nav-link hover:text-gold-light transition-colors">Colección</a></li>
+      <li><a href="#features" class="nav-link hover:text-gold-light transition-colors">Nosotros</a></li>
+      <li><a href="#footer"   class="nav-link hover:text-gold-light transition-colors">Contacto</a></li>
+    </ul>
+    <button id="cart-btn"
+      class="relative flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-white/30 transition-all">
+      <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+      <span>Carrito</span>
+      <span id="cart-count"
+        class="absolute -top-2 -right-2 bg-rose-quartz text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">0</span>
+    </button>
+  </nav>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Background -->
+    <div class="hero-bg absolute inset-0"></div>
+    <!-- Petals -->
+    <div class="petal-container absolute inset-0 pointer-events-none" id="petals"></div>
+    <!-- Content -->
+    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
+      <p class="hero-subtitle font-mont text-sm uppercase tracking-[0.3em] text-gold-light mb-4 opacity-0">Día de la Madre 2026</p>
+      <h1 class="hero-title font-playfair text-5xl md:text-7xl font-bold text-white leading-tight mb-6 opacity-0">
+        El regalo perfecto<br/><em class="text-gold-light">para Mamá</em>
+      </h1>
+      <p class="hero-desc font-mont text-lg text-white/80 mb-10 max-w-xl mx-auto opacity-0">
+        Polos personalizados con diseños únicos que expresan todo el amor que sientes. Calidad premium, entrega en toda Bolivia.
+      </p>
+      <div class="hero-btns flex flex-col sm:flex-row gap-4 justify-center opacity-0">
+        <a href="#gallery"
+          class="bg-white text-rose-quartz font-semibold px-8 py-4 rounded-full hover:bg-rose-light transition-all hover:scale-105 shadow-lg">
+          Ver Colección ✨
+        </a>
+        <a href="https://wa.me/59170000000?text=Hola!%20Quiero%20un%20polo%20personalizado%20para%20el%20D%C3%ADa%20de%20la%20Madre"
+          target="_blank"
+          class="bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-full hover:bg-white/20 transition-all hover:scale-105">
+          Pedir por WhatsApp
+        </a>
+      </div>
+    </div>
+    <!-- Scroll hint -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-white/60">
+      <i data-lucide="chevrons-down" class="w-6 h-6"></i>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FILTER BAR ═══════════════ -->
+  <section class="bg-white sticky top-16 z-40 shadow-sm py-4 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center gap-4 justify-between">
+      <p class="font-playfair text-rose-quartz text-lg font-semibold">Nuestra Colección</p>
+      <div class="flex gap-3 flex-wrap justify-center" id="filter-btns">
+        <button data-filter="all"       class="filter-btn active">🌸 Todos</button>
+        <button data-filter="bestseller" class="filter-btn">⭐ Más Vendidos</button>
+        <button data-filter="new"       class="filter-btn">✨ Nuevos Diseños</button>
+        <button data-filter="sale"      class="filter-btn">🏷️ Ofertas</button>
+      </div>
+      <div class="relative">
+        <input id="search-input" type="text" placeholder="Buscar polo..."
+          class="border border-rose-light rounded-full px-4 py-2 text-sm focus:outline-none focus:border-rose-quartz w-44" />
+        <i data-lucide="search" class="absolute right-3 top-2.5 w-4 h-4 text-rose-quartz"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ GALLERY ═══════════════ -->
+  <section id="gallery" class="py-16 px-6 max-w-7xl mx-auto">
+    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Products injected by JS -->
+    </div>
+    <div id="empty-state" class="hidden text-center py-16">
+      <p class="text-5xl mb-4">🔍</p>
+      <p class="font-playfair text-2xl text-rose-quartz">No encontramos resultados</p>
+      <p class="text-gray-400 mt-2">Prueba con otro filtro o búsqueda</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FEATURES ═══════════════ -->
+  <section id="features" class="py-20 px-6 bg-gradient-to-br from-rose-light/40 to-cream">
+    <div class="max-w-5xl mx-auto text-center mb-14 reveal">
+      <h2 class="font-playfair text-4xl font-bold text-rose-dark mb-4">¿Por qué elegirnos?</h2>
+      <p class="text-gray-500 font-mont">Cada polo es una obra de amor hecha a tu medida</p>
+    </div>
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="feature-card reveal">
+        <div class="feature-icon">🎨</div>
+        <h3>Diseño Personalizado</h3>
+        <p>Tu nombre, mensaje o foto favorita. Hacemos realidad cualquier diseño que imagines.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">👕</div>
+        <h3>Tela Premium</h3>
+        <p>100% algodón peinado de alta densidad. Suave, durable y con colores que no se desvanecen.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">🚚</div>
+        <h3>Entrega a Domicilio</h3>
+        <p>Enviamos a todo Bolivia. Recibe tu pedido a tiempo para sorprender a Mamá.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TESTIMONIALS ═══════════════ -->
+  <section class="py-16 px-6 bg-white">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="font-playfair text-3xl font-bold text-center text-rose-dark mb-10 reveal">Lo que dicen nuestras clientas</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="testimonial-card reveal">
+          <div class="stars">★★★★★</div>
+          <p>"¡Mi mamá lloró de felicidad cuando vio el polo! Quedó hermoso y llegó súper rápido."</p>
+          <span>— Valeria M., Santa Cruz</span>
+        </div>
+        <div class="testimonial-card reveal">
+          <div class="stars">★★★★★</div>
+          <p>"La calidad es increíble, el diseño floral exactamente como lo pedí. ¡100% recomendado!"</p>
+          <span>— Sofía R., La Paz</span>
+        </div>
+        <div class="testimonial-card reveal">
+          <div class="stars">★★★★★</div>
+          <p>"Pedí 3 polos para toda la familia. Todos quedaron perfectos. Ya hice mi segundo pedido."</p>
+          <span>— Carolina T., Cochabamba</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer id="footer" class="bg-rose-dark text-white py-12 px-6">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <p class="font-playfair text-2xl font-bold mb-3">🌸 PoloMamá</p>
+        <p class="text-white/70 text-sm leading-relaxed">Polos personalizados con amor para el Día de la Madre. Hacemos realidad el regalo que Mamá merece.</p>
+      </div>
+      <div>
+        <p class="font-semibold mb-4 uppercase tracking-wider text-sm text-gold-light">Siguenos</p>
+        <div class="flex gap-4">
+          <a href="#" class="social-link" title="Instagram">
+            <i data-lucide="instagram" class="w-5 h-5"></i> Instagram
+          </a>
+          <a href="#" class="social-link" title="Facebook">
+            <i data-lucide="facebook" class="w-5 h-5"></i> Facebook
+          </a>
+          <a href="#" class="social-link" title="TikTok">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.03a8.16 8.16 0 004.77 1.52V7.1a4.85 4.85 0 01-1-.41z"/></svg>
+            TikTok
+          </a>
+        </div>
+      </div>
+      <div>
+        <p class="font-semibold mb-4 uppercase tracking-wider text-sm text-gold-light">Contacto</p>
+        <p class="text-white/70 text-sm flex items-center gap-2 mb-2">
+          <i data-lucide="phone" class="w-4 h-4 text-gold-light"></i> +591 700-00000
+        </p>
+        <p class="text-white/70 text-sm flex items-center gap-2 mb-2">
+          <i data-lucide="mail" class="w-4 h-4 text-gold-light"></i> hola@polomama.bo
+        </p>
+        <p class="text-white/70 text-sm flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4 text-gold-light"></i> Bolivia — Envíos nacionales
+        </p>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto mt-8 pt-8 border-t border-white/20 text-center text-white/40 text-xs">
+      © 2026 PoloMamá. Hecho con 💖 para todas las mamás de Bolivia.
+    </div>
+  </footer>
+
+  <!-- ═══════════════ FLOATING ELEMENTS ═══════════════ -->
+
+  <!-- WhatsApp Button -->
+  <a id="whatsapp-btn"
+    href="https://wa.me/59170000000?text=Hola!%20Quiero%20un%20polo%20personalizado%20para%20el%20D%C3%ADa%20de%20la%20Madre"
+    target="_blank"
+    class="fixed bottom-6 right-6 z-50 bg-green-500 text-white rounded-full p-4 shadow-2xl hover:scale-110 transition-all hover:bg-green-600"
+    title="Chatear por WhatsApp">
+    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </a>
+
+  <!-- Floating Promo Banner -->
+  <div id="float-promo" class="fixed bottom-24 right-6 z-50">
+    <div class="float-promo-inner bg-white rounded-2xl shadow-2xl border border-rose-light p-4 max-w-[200px]">
+      <button id="close-promo" class="absolute -top-2 -right-2 bg-rose-quartz text-white rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-rose-dark transition-colors">✕</button>
+      <div class="text-2xl text-center mb-1">💝</div>
+      <p class="font-playfair text-rose-dark text-sm font-semibold text-center leading-snug" id="promo-text">¡Cómprale algo especial a Mamá!</p>
+      <div class="mt-2 flex justify-center">
+        <span class="bg-rose-light text-rose-dark text-xs font-semibold px-3 py-1 rounded-full">Ver colección →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ CART SIDEBAR ═══════════════ -->
+  <div id="cart-overlay" class="fixed inset-0 bg-black/50 z-[60] hidden opacity-0 transition-opacity duration-300"></div>
+  <aside id="cart-sidebar" class="fixed top-0 right-0 h-full w-full max-w-sm bg-white z-[70] shadow-2xl translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="flex items-center justify-between p-6 border-b border-rose-light">
+      <h2 class="font-playfair text-xl font-bold text-rose-dark">Tu Carrito 🛍️</h2>
+      <button id="close-cart" class="text-gray-400 hover:text-rose-dark transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
+      <div id="cart-empty" class="text-center py-16">
+        <p class="text-5xl mb-4">🛒</p>
+        <p class="font-playfair text-xl text-gray-400">Tu carrito está vacío</p>
+        <p class="text-gray-300 text-sm mt-2">¡Agrega el polo perfecto para Mamá!</p>
+      </div>
+    </div>
+    <div class="p-6 border-t border-rose-light">
+      <div class="flex justify-between items-center mb-4">
+        <span class="font-semibold text-gray-600">Total:</span>
+        <span class="font-playfair text-2xl font-bold text-rose-dark">Bs. <span id="cart-total">0</span></span>
+      </div>
+      <button id="checkout-btn"
+        class="w-full bg-rose-quartz text-white font-semibold py-4 rounded-full hover:bg-rose-dark transition-colors hover:scale-105 transition-all">
+        Pedir por WhatsApp 💚
+      </button>
+      <p class="text-center text-xs text-gray-400 mt-3">Pago contra entrega disponible</p>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ TOAST ═══════════════ -->
+  <div id="toast" class="fixed top-24 right-6 z-[80] hidden">
+    <div class="bg-white border-l-4 border-rose-quartz rounded-lg shadow-xl px-5 py-4 flex items-center gap-3">
+      <span class="text-xl">🌸</span>
+      <p id="toast-msg" class="font-mont text-sm text-gray-700 font-medium"></p>
+    </div>
+  </div>
+
+  <!-- JS Modules -->
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/gallery.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
