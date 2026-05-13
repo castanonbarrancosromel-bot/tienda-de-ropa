@@ -4,13 +4,16 @@
  */
 
 // ══ SUPABASE CONFIG ══
+// ⚠️ IMPORTANTE: Reemplaza con tu anon key real de:
+//    https://supabase.com/dashboard/project/qipivftteapqbagtjicn/settings/api
 const SUPABASE_URL  = 'https://qipivftteapqbagtjicn.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE';
+const SUPABASE_ANON = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE'; // ← reemplazar con anon key JWT
 const SB_TABLE      = 'products';
 
 let _sb = null;
 function getSB() {
-  if (!_sb && SUPABASE_URL !== 'TU_URL_AQUÍ') {
+  // La anon key real de Supabase empieza con 'eyJ' (JWT)
+  if (!_sb && SUPABASE_ANON.startsWith('eyJ') && SUPABASE_URL.includes('supabase.co')) {
     _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   }
   return _sb;
@@ -106,7 +109,7 @@ const PRODUCTS_DB = [
 
 /**
  * loadProducts()
- * Carga desde Supabase si está configurado, sino usa PRODUCTS_DB local.
+ * Carga desde Supabase si está configurado con clave válida, sino usa PRODUCTS_DB local.
  */
 async function loadProducts() {
   const sb = getSB();
@@ -115,10 +118,10 @@ async function loadProducts() {
       const { data, error } = await sb
         .from(SB_TABLE)
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(80);
       if (!error && data && data.length > 0) {
         console.log(`✅ ${data.length} productos cargados desde Supabase`);
-        // Normalizar campos de Supabase al formato esperado por gallery.js
         return data.map(p => ({
           id:       p.id,
           name:     p.name,
@@ -130,9 +133,16 @@ async function loadProducts() {
           badge:    p.category || 'new',
           sizes:    p.sizes ? p.sizes.split(',').map(s => s.trim()) : ['S','M','L','XL'],
         }));
+      } else if (error) {
+        console.warn('⚠️ Supabase error:', error.message);
       }
-    } catch(e) { console.warn('Supabase error:', e.message); }
+    } catch(e) { console.warn('⚠️ Supabase error:', e.message); }
+  } else {
+    console.warn('🔑 Clave Supabase no configurada. Para conectar el catálogo real:\n'
+      + '1. Ve a https://supabase.com/dashboard/project/qipivftteapqbagtjicn/settings/api\n'
+      + '2. Copia la "anon public key" (empieza con eyJ...)\n'
+      + '3. Pégala en SUPABASE_ANON en js/data.js y en admin.html');
   }
-  console.log('📦 Catálogo local activo (configura Supabase en data.js)');
+  console.log('📦 Catálogo local activo (80 productos demo)');
   return new Promise(resolve => setTimeout(() => resolve(PRODUCTS_DB), 200));
 }

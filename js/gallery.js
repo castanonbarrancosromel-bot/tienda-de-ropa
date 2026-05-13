@@ -15,7 +15,7 @@ async function initGallery() {
   initFilters();
   initSearch();
 }
-
+ 
 // ── Build product card HTML ──
 function buildCard(product) {
   const badgeMap = {

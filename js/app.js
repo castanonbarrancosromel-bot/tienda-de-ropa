@@ -1,13 +1,7 @@
 /**
  * app.js — Main application entry point
- * Orchestrates all modules: Firebase, Gallery, Cart, Animations.
- *
- * Firebase: activo — inicializado via js/firebase.js
+ * Orchestrates all modules: Supabase, Gallery, Cart, Animations.
  */
-
-// Instancias globales de Firebase (disponibles en todos los módulos)
-let _firebaseDB = null;
-let _firebaseApp = null;
 
 // ══ TOAST Notification ══
 function showToast(msg, duration = 2800) {
@@ -48,15 +42,8 @@ function closeCart() {
 // ══ APP INIT ══
 document.addEventListener('DOMContentLoaded', async () => {
 
-  // ── 1. Inicializar Firebase ──
-  try {
-    const fb = initFirebase();
-    _firebaseApp = fb.app;
-    _firebaseDB = fb.db;
-    trackEvent('page_view', { page: 'home', tienda: 'PoloMamá' });
-  } catch (err) {
-    console.warn('⚠️ Firebase no disponible, modo offline activo:', err.message);
-  }
+  // ── 1. Supabase ya inicializado en data.js (via getSB()) ──
+  console.log('🌸 PoloMamá iniciando...');
 
   // ── 2. Init Lucide icons ──
   lucide.createIcons();

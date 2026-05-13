@@ -206,14 +206,34 @@
 // ═══════════════════════════════════════════════
 //  ⚙️  CONFIGURACIÓN — Pega tus credenciales aquí
 // ═══════════════════════════════════════════════
+// ⚠️ La clave aquí abajo DEBE ser la "anon public key" de:
+//    https://supabase.com/dashboard/project/qipivftteapqbagtjicn/settings/api
+//    (empieza con eyJ...)
 const SUPABASE_URL  = 'https://qipivftteapqbagtjicn.supabase.co';
-const SUPABASE_KEY  = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE';
-const TABLE_NAME    = 'products';              // ← nombre de tu tabla
+const SUPABASE_KEY  = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE'; // ← reemplazar con anon key
+const TABLE_NAME    = 'products';
 // ═══════════════════════════════════════════════
 
-// Init Supabase
+// Init Supabase — verificar que la key sea JWT válido
 const { createClient } = window.supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+let sb;
+try {
+  if (!SUPABASE_KEY.startsWith('eyJ')) {
+    throw new Error('La SUPABASE_KEY no es un JWT válido. Debes usar la "anon public key" de tu proyecto.');
+  }
+  sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) {
+  console.error('❌ Error Supabase:', e.message);
+  // Mostrar alerta visual en el panel
+  document.addEventListener('DOMContentLoaded', () => {
+    const errDiv = document.createElement('div');
+    errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:#fff;padding:12px 20px;text-align:center;z-index:9999;font-size:13px;';
+    errDiv.innerHTML = `❌ <strong>Error de configuración Supabase:</strong> La clave API no es válida. 
+      Ve a <a href="https://supabase.com/dashboard/project/qipivftteapqbagtjicn/settings/api" target="_blank" style="color:#fff;text-decoration:underline">Supabase Dashboard</a> 
+      y copia la <strong>anon public key</strong> (empieza con eyJ...)`;
+    document.body.prepend(errDiv);
+  });
+}
 
 // ══ CREDENCIALES DE ADMINISTRADOR (acceso local) ══
 const ADMIN_EMAIL    = 'tiendaderopamoda3@gmail.com';
@@ -227,21 +247,26 @@ let deleteId    = null;
 //  PROTECCIÓN DE RUTA
 // ══════════════════════════════
 (async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    showDashboard(session.user.email);
-  } else {
-    document.getElementById('login-screen').classList.remove('hidden');
+  if (sb) {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      showDashboard(session.user.email);
+      return;
+    }
   }
+  // Sin sesión activa — mostrar login
+  document.getElementById('login-screen').classList.remove('hidden');
 })();
 
 // Escuchar cambios de sesión
-sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT') {
-    document.getElementById('dashboard').classList.add('hidden');
-    document.getElementById('login-screen').classList.remove('hidden');
-  }
-});
+if (sb) {
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+    }
+  });
+}
 
 // ══════════════════════════════
 //  LOGIN
@@ -256,16 +281,25 @@ document.getElementById('login-form').addEventListener('submit', async e => {
   btn.textContent = 'Verificando...';
 
   // 1º intento: Supabase Auth
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  let authOk = false;
+  if (sb) {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (!error && data.user) {
+      authOk = true;
+      showDashboard(data.user.email);
+    } else if (error) {
+      console.warn('Supabase auth error:', error.message);
+    }
+  }
 
-  if (!error && data.user) {
-    showDashboard(data.user.email);
-  } else if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
-    // 2º intento: credenciales locales de respaldo
-    showDashboard(email);
-  } else {
-    err.textContent = 'Usuario o contraseña incorrectos.';
-    err.classList.remove('hidden');
+  if (!authOk) {
+    if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+      // 2º intento: credenciales locales de respaldo
+      showDashboard(email);
+    } else {
+      err.textContent = 'Usuario o contraseña incorrectos.';
+      err.classList.remove('hidden');
+    }
   }
   btn.textContent = 'Ingresar';
 });
@@ -278,7 +312,9 @@ function showDashboard(email) {
 }
 
 async function logout() {
-  await sb.auth.signOut();
+  if (sb) await sb.auth.signOut();
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
 }
 
 // ══════════════════════════════
@@ -288,6 +324,14 @@ async function loadProducts() {
   document.getElementById('loading').classList.remove('hidden');
   document.getElementById('prod-list').innerHTML = '';
   document.getElementById('empty').classList.add('hidden');
+
+  if (!sb) {
+    document.getElementById('loading').classList.add('hidden');
+    toast('⚠️ Supabase no configurado. Ingresa la anon key correcta.', 'err');
+    document.getElementById('empty').textContent = '🔑 Configura la anon key de Supabase para gestionar productos reales.';
+    document.getElementById('empty').classList.remove('hidden');
+    return;
+  }
 
   const { data, error } = await sb
     .from(TABLE_NAME)
@@ -362,7 +406,8 @@ document.getElementById('search').addEventListener('input', function() {
 // ══════════════════════════════
 //  SUBIR IMAGEN A SUPABASE STORAGE
 // ══════════════════════════════
-const BUCKET = 'Imagenes de ropa';
+// Nombre del bucket en Supabase Storage (sin espacios, tal como está en tu proyecto)
+const BUCKET = 'imagenes-de-ropa';
 
 document.getElementById('f-file').addEventListener('change', async function() {
   const file = this.files[0];
@@ -427,6 +472,7 @@ document.getElementById('prod-form').addEventListener('submit', async e => {
   const btn   = document.getElementById('f-btn');
 
   if (!name || isNaN(price)) { toast('Nombre y precio son obligatorios', 'err'); return; }
+  if (!sb) { toast('Supabase no configurado. Actualiza la anon key.', 'err'); return; }
 
   btn.textContent = 'Guardando...';
   const payload = { name, price, image_url: img || null, description: desc || null, category: cat };
