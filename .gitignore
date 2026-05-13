@@ -1,0 +1,18 @@
+# Dependencias de Node
+node_modules/
+
+# Firebase CLI
+.firebase/
+
+# Variables de entorno (¡NUNCA subir al repo!)
+.env
+.env.local
+.env.production
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

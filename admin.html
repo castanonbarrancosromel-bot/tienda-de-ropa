@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin | PoloMamá</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{font-family:'Inter',sans-serif}
+    body{background:#0f0f1a}
+    .glass{background:rgba(255,255,255,.06);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1)}
+    .inp{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 16px;color:#fff;outline:none;transition:all .2s}
+    .inp:focus{border-color:#B5838D;box-shadow:0 0 0 3px rgba(181,131,141,.15)}
+    .inp::placeholder{color:rgba(255,255,255,.3)}
+    .inp option{background:#1a1a2e}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+    .btn-p{background:#B5838D;color:#fff}.btn-p:hover{background:#8B5E6A;transform:scale(1.03)}
+    .btn-g{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)}.btn-g:hover{background:rgba(255,255,255,.15)}
+    .btn-d{background:rgba(239,68,68,.15);color:#f87171}.btn-d:hover{background:rgba(239,68,68,.3)}
+    .btn-e{background:rgba(201,149,108,.15);color:#fbbf24}.btn-e:hover{background:rgba(201,149,108,.3)}
+    .fade{animation:fade .25s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .spin{animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #toast{position:fixed;bottom:24px;right:24px;z-index:999;transition:all .3s;pointer-events:none}
+  </style>
+</head>
+<body class="text-white min-h-screen">
+
+<!-- TOAST -->
+<div id="toast" class="opacity-0">
+  <div id="toast-body" class="glass px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-2"></div>
+</div>
+
+<!-- ════ LOGIN ════ -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center px-4">
+  <div class="glass rounded-3xl p-8 w-full max-w-sm fade">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:rgba(181,131,141,.2)">
+        <span class="text-3xl">🌸</span>
+      </div>
+      <h1 class="text-2xl font-bold">Acceso Admin</h1>
+      <p class="text-white/40 text-sm mt-1">PoloMamá — Panel de Control</p>
+    </div>
+    <form id="login-form" class="space-y-4">
+      <input id="l-email" type="email" placeholder="correo@ejemplo.com" class="inp"/>
+      <input id="l-pass"  type="password" placeholder="Contraseña" class="inp"/>
+      <p id="l-err" class="text-red-400 text-sm hidden"></p>
+      <button type="submit" class="btn btn-p w-full justify-center">
+        <span id="l-btn">Ingresar</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ════ DASHBOARD ════ -->
+<div id="dashboard" class="hidden min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-xl">🌸</span>
+      <div>
+        <p class="font-bold text-sm leading-none">PoloMamá Admin</p>
+        <p id="nav-email" class="text-white/30 text-xs mt-0.5"></p>
+      </div>
+    </div>
+    <button onclick="logout()" class="btn btn-g text-sm px-4 py-2">
+      <i data-lucide="log-out" class="w-4 h-4"></i> Salir
+    </button>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="glass rounded-2xl p-4 fade">
+        <p class="text-white/40 text-xs uppercase tracking-wider">Productos</p>
+        <p id="s-total" class="text-3xl font-bold mt-1" style="color:#B5838D">—</p>
+      </div>
+      <div class="glass rounded-2xl p-4 fade">
+        <p class="text-white/40 text-xs uppercase tracking-wider">Mínimo</p>
+        <p id="s-min" class="text-3xl font-bold mt-1" style="color:#C9956C">—</p>
+      </div>
+      <div class="glass rounded-2xl p-4 fade">
+        <p class="text-white/40 text-xs uppercase tracking-wider">Máximo</p>
+        <p id="s-max" class="text-3xl font-bold mt-1" style="color:#C9956C">—</p>
+      </div>
+      <div class="glass rounded-2xl p-4 fade">
+        <p class="text-white/40 text-xs uppercase tracking-wider">Promedio</p>
+        <p id="s-avg" class="text-3xl font-bold mt-1 text-emerald-400">—</p>
+      </div>
+    </div>
+
+    <!-- Content grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Formulario -->
+      <div class="lg:col-span-1">
+        <div class="glass rounded-2xl p-6 sticky top-24">
+          <h2 id="form-title" class="font-bold text-lg mb-5 flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-5 h-5" style="color:#B5838D"></i> Nuevo Producto
+          </h2>
+          <form id="prod-form" class="space-y-4">
+            <input type="hidden" id="f-id"/>
+            <div>
+              <label class="text-xs text-white/40 uppercase tracking-wider block mb-1.5">Nombre *</label>
+              <input id="f-name" type="text" placeholder="Polo Floral Mamá" class="inp" required/>
+            </div>
+            <div>
+              <label class="text-xs text-white/40 uppercase tracking-wider block mb-1.5">Precio Bs. *</label>
+              <input id="f-price" type="number" placeholder="120" min="0" step="0.5" class="inp" required/>
+            </div>
+            <div>
+              <label class="text-xs text-white/40 uppercase tracking-wider block mb-1.5">Imagen del Producto</label>
+              <!-- File picker -->
+              <label for="f-file" class="flex flex-col items-center justify-center w-full h-28 rounded-xl border-2 border-dashed cursor-pointer transition-all hover:border-pink-400/60" style="border-color:rgba(181,131,141,.4);background:rgba(255,255,255,.04)">
+                <i data-lucide="upload-cloud" class="w-7 h-7 mb-1" style="color:#B5838D"></i>
+                <span class="text-xs text-white/40">Click para subir imagen</span>
+                <span id="f-file-name" class="text-xs mt-1" style="color:#B5838D"></span>
+              </label>
+              <input id="f-file" type="file" accept="image/*" class="hidden"/>
+              <!-- Barra de progreso -->
+              <div id="upload-bar-wrap" class="hidden mt-2">
+                <div class="w-full rounded-full h-1.5" style="background:rgba(255,255,255,.1)">
+                  <div id="upload-bar" class="h-1.5 rounded-full transition-all" style="width:0%;background:#B5838D"></div>
+                </div>
+                <p id="upload-status" class="text-xs text-white/40 mt-1">Subiendo...</p>
+              </div>
+              <!-- Preview -->
+              <img id="f-preview" class="hidden w-full h-32 object-cover rounded-xl mt-2 opacity-80"/>
+              <!-- URL guardada (oculta) -->
+              <input type="hidden" id="f-img-url"/>
+            </div>
+            <div>
+              <label class="text-xs text-white/40 uppercase tracking-wider block mb-1.5">Descripción</label>
+              <textarea id="f-desc" rows="2" placeholder="Descripción..." class="inp resize-none"></textarea>
+            </div>
+            <div>
+              <label class="text-xs text-white/40 uppercase tracking-wider block mb-1.5">Categoría</label>
+              <select id="f-cat" class="inp">
+                <option value="bestseller">⭐ Más Vendido</option>
+                <option value="new">✨ Nuevo</option>
+                <option value="sale">🏷️ Oferta</option>
+              </select>
+            </div>
+            <div class="flex gap-2 pt-1">
+              <button type="submit" class="btn btn-p flex-1 justify-center">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span id="f-btn">Guardar</span>
+              </button>
+              <button type="button" onclick="resetForm()" class="btn btn-g px-4">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Lista -->
+      <div class="lg:col-span-2">
+        <div class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+            <h2 class="font-bold text-lg flex items-center gap-2">
+              <i data-lucide="layout-grid" class="w-5 h-5" style="color:#B5838D"></i> Catálogo
+            </h2>
+            <div class="relative">
+              <input id="search" type="text" placeholder="Buscar..." class="inp py-2 pl-9 w-44 text-sm"/>
+              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-white/30"></i>
+            </div>
+          </div>
+          <div id="loading" class="text-center py-16">
+            <div class="w-10 h-10 rounded-full border-2 border-t-transparent mx-auto mb-3 spin" style="border-color:#B5838D;border-top-color:transparent"></div>
+            <p class="text-white/40 text-sm">Conectando a Supabase...</p>
+          </div>
+          <p id="empty" class="hidden text-center py-16 text-white/30">📦 Sin productos. ¡Agrega el primero!</p>
+          <div id="prod-list" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal eliminar -->
+<div id="del-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center px-4" style="display:none">
+  <div class="glass rounded-2xl p-6 w-full max-w-xs text-center fade">
+    <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:rgba(239,68,68,.15)">
+      <i data-lucide="trash-2" class="w-7 h-7 text-red-400"></i>
+    </div>
+    <h3 class="font-bold text-lg mb-1">¿Eliminar producto?</h3>
+    <p class="text-white/40 text-sm mb-6">Esta acción no se puede deshacer.</p>
+    <div class="flex gap-3">
+      <button onclick="closeModal()" class="btn btn-g flex-1 justify-center">Cancelar</button>
+      <button id="del-confirm" class="btn flex-1 justify-center" style="background:#ef4444;color:#fff">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  ⚙️  CONFIGURACIÓN — Pega tus credenciales aquí
+// ═══════════════════════════════════════════════
+const SUPABASE_URL  = 'https://qipivftteapqbagtjicn.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE';
+const TABLE_NAME    = 'products';              // ← nombre de tu tabla
+// ═══════════════════════════════════════════════
+
+// Init Supabase
+const { createClient } = window.supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ══ CREDENCIALES DE ADMINISTRADOR (acceso local) ══
+const ADMIN_EMAIL    = 'tiendaderopamoda3@gmail.com';
+const ADMIN_PASSWORD = 'Romel(90)';
+
+// ── Estado ──
+let allProducts = [];
+let deleteId    = null;
+
+// ══════════════════════════════
+//  PROTECCIÓN DE RUTA
+// ══════════════════════════════
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    showDashboard(session.user.email);
+  } else {
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+})();
+
+// Escuchar cambios de sesión
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    document.getElementById('dashboard').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+});
+
+// ══════════════════════════════
+//  LOGIN
+// ══════════════════════════════
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  const btn   = document.getElementById('l-btn');
+  const err   = document.getElementById('l-err');
+  err.classList.add('hidden');
+  btn.textContent = 'Verificando...';
+
+  // 1º intento: Supabase Auth
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+
+  if (!error && data.user) {
+    showDashboard(data.user.email);
+  } else if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+    // 2º intento: credenciales locales de respaldo
+    showDashboard(email);
+  } else {
+    err.textContent = 'Usuario o contraseña incorrectos.';
+    err.classList.remove('hidden');
+  }
+  btn.textContent = 'Ingresar';
+});
+
+function showDashboard(email) {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('nav-email').textContent = email;
+  loadProducts();
+}
+
+async function logout() {
+  await sb.auth.signOut();
+}
+
+// ══════════════════════════════
+//  LEER PRODUCTOS
+// ══════════════════════════════
+async function loadProducts() {
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('prod-list').innerHTML = '';
+  document.getElementById('empty').classList.add('hidden');
+
+  const { data, error } = await sb
+    .from(TABLE_NAME)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  document.getElementById('loading').classList.add('hidden');
+
+  if (error) { toast('Error: ' + error.message, 'err'); return; }
+
+  allProducts = data || [];
+  renderList(allProducts);
+  updateStats(allProducts);
+}
+
+// ══════════════════════════════
+//  RENDERIZAR
+// ══════════════════════════════
+function renderList(list) {
+  const el = document.getElementById('prod-list');
+  if (!list.length) { document.getElementById('empty').classList.remove('hidden'); el.innerHTML = ''; return; }
+  document.getElementById('empty').classList.add('hidden');
+
+  el.innerHTML = list.map(p => `
+    <div class="glass rounded-xl p-4 flex items-center gap-4 fade hover:border-pink-400/30 transition-all group">
+      <img src="${p.image_url||'https://placehold.co/80x80/1a1a2e/B5838D?text=📸'}"
+        onerror="this.src='https://placehold.co/80x80/1a1a2e/B5838D?text=📸'"
+        class="w-16 h-16 object-cover rounded-xl flex-shrink-0 group-hover:scale-105 transition-transform"/>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold truncate">${p.name}</p>
+        <p class="text-white/40 text-xs mt-0.5 truncate">${p.description||'—'}</p>
+        <div class="flex items-center gap-2 mt-1.5">
+          <span class="font-bold text-sm" style="color:#C9956C">Bs. ${Number(p.price).toFixed(2)}</span>
+          ${p.category?`<span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(181,131,141,.2);color:#B5838D">${p.category}</span>`:''}
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5 flex-shrink-0">
+        <button onclick="editProduct(${p.id})" class="btn btn-e text-xs px-3 py-1.5">
+          <i data-lucide="pencil" class="w-3 h-3"></i> Editar
+        </button>
+        <button onclick="openModal(${p.id})" class="btn btn-d text-xs px-3 py-1.5">
+          <i data-lucide="trash-2" class="w-3 h-3"></i> Borrar
+        </button>
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+// ══════════════════════════════
+//  ESTADÍSTICAS
+// ══════════════════════════════
+function updateStats(list) {
+  document.getElementById('s-total').textContent = list.length;
+  if (!list.length) return;
+  const prices = list.map(p => Number(p.price));
+  document.getElementById('s-min').textContent = 'Bs.' + Math.min(...prices);
+  document.getElementById('s-max').textContent = 'Bs.' + Math.max(...prices);
+  document.getElementById('s-avg').textContent = 'Bs.' + (prices.reduce((a,b)=>a+b,0)/prices.length).toFixed(0);
+}
+
+// ══════════════════════════════
+//  BUSCAR
+// ══════════════════════════════
+document.getElementById('search').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  renderList(allProducts.filter(p =>
+    p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q)
+  ));
+});
+
+// ══════════════════════════════
+//  SUBIR IMAGEN A SUPABASE STORAGE
+// ══════════════════════════════
+const BUCKET = 'Imagenes de ropa';
+
+document.getElementById('f-file').addEventListener('change', async function() {
+  const file = this.files[0];
+  if (!file) return;
+
+  // Nombre único para el archivo
+  const ext      = file.name.split('.').pop();
+  const fileName = `producto_${Date.now()}.${ext}`;
+
+  // Mostrar nombre y barra
+  document.getElementById('f-file-name').textContent = file.name;
+  document.getElementById('upload-bar-wrap').classList.remove('hidden');
+  document.getElementById('upload-bar').style.width = '30%';
+  document.getElementById('upload-status').textContent = 'Subiendo imagen...';
+
+  // Preview local inmediato
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const prev = document.getElementById('f-preview');
+    prev.src = ev.target.result;
+    prev.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+
+  // Subir a Supabase Storage
+  const { data, error } = await sb.storage
+    .from(BUCKET)
+    .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+  if (error) {
+    toast('Error al subir imagen: ' + error.message, 'err');
+    document.getElementById('upload-bar-wrap').classList.add('hidden');
+    return;
+  }
+
+  // Obtener URL pública
+  const { data: urlData } = sb.storage.from(BUCKET).getPublicUrl(fileName);
+  const publicURL = urlData.publicUrl;
+
+  // Guardar URL en campo oculto
+  document.getElementById('f-img-url').value = publicURL;
+
+  // Actualizar barra a completado
+  document.getElementById('upload-bar').style.width = '100%';
+  document.getElementById('upload-status').textContent = '✅ Imagen subida correctamente';
+  setTimeout(() => document.getElementById('upload-bar-wrap').classList.add('hidden'), 2000);
+
+  toast('Imagen subida ✅', 'ok');
+});
+
+// ══════════════════════════════
+//  CREAR / ACTUALIZAR
+// ══════════════════════════════
+document.getElementById('prod-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id    = document.getElementById('f-id').value;
+  const name  = document.getElementById('f-name').value.trim();
+  const price = parseFloat(document.getElementById('f-price').value);
+  const img   = document.getElementById('f-img-url').value.trim(); // URL de Storage
+  const desc  = document.getElementById('f-desc').value.trim();
+  const cat   = document.getElementById('f-cat').value;
+  const btn   = document.getElementById('f-btn');
+
+  if (!name || isNaN(price)) { toast('Nombre y precio son obligatorios', 'err'); return; }
+
+  btn.textContent = 'Guardando...';
+  const payload = { name, price, image_url: img || null, description: desc || null, category: cat };
+
+  let error;
+  if (id) {
+    ({ error } = await sb.from(TABLE_NAME).update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from(TABLE_NAME).insert([payload]));
+  }
+
+  btn.textContent = 'Guardar';
+  if (error) { toast('Error: ' + error.message, 'err'); return; }
+
+  toast(id ? '✨ Producto actualizado' : '🎉 Producto agregado', 'ok');
+  resetForm();
+  loadProducts();
+});
+
+// ══════════════════════════════
+//  EDITAR
+// ══════════════════════════════
+function editProduct(id) {
+  const p = allProducts.find(x => x.id == id);
+  if (!p) return;
+  document.getElementById('f-id').value    = p.id;
+  document.getElementById('f-name').value  = p.name;
+  document.getElementById('f-price').value = p.price;
+  document.getElementById('f-img-url').value = p.image_url || '';
+  document.getElementById('f-desc').value  = p.description || '';
+  document.getElementById('f-cat').value   = p.category || 'new';
+  const prev = document.getElementById('f-preview');
+  if (p.image_url) {
+    prev.src = p.image_url;
+    prev.classList.remove('hidden');
+    document.getElementById('f-file-name').textContent = 'Imagen actual cargada';
+  }
+  document.getElementById('form-title').innerHTML =
+    '<i data-lucide="pencil" class="w-5 h-5" style="color:#C9956C"></i> Editar Producto';
+  document.getElementById('f-btn').textContent = 'Actualizar';
+  lucide.createIcons();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════
+//  ELIMINAR
+// ══════════════════════════════
+function openModal(id) {
+  deleteId = id;
+  const m = document.getElementById('del-modal');
+  m.style.display = 'flex';
+}
+function closeModal() {
+  deleteId = null;
+  document.getElementById('del-modal').style.display = 'none';
+}
+document.getElementById('del-confirm').addEventListener('click', async () => {
+  if (!deleteId) return;
+  const { error } = await sb.from(TABLE_NAME).delete().eq('id', deleteId);
+  closeModal();
+  if (error) { toast('Error: ' + error.message, 'err'); return; }
+  toast('Producto eliminado', 'info');
+  loadProducts();
+});
+
+// ══════════════════════════════
+//  RESET FORM
+// ══════════════════════════════
+function resetForm() {
+  document.getElementById('prod-form').reset();
+  document.getElementById('f-id').value = '';
+  document.getElementById('f-preview').classList.add('hidden');
+  document.getElementById('form-title').innerHTML =
+    '<i data-lucide="plus-circle" class="w-5 h-5" style="color:#B5838D"></i> Nuevo Producto';
+  document.getElementById('f-btn').textContent = 'Guardar';
+  lucide.createIcons();
+}
+
+// ══════════════════════════════
+//  TOAST
+// ══════════════════════════════
+let toastTimer;
+function toast(msg, type = 'ok') {
+  const t  = document.getElementById('toast');
+  const tb = document.getElementById('toast-body');
+  const c  = { ok:'color:#34d399', err:'color:#f87171', info:'color:#B5838D' };
+  tb.innerHTML = `<span>${{ok:'✅',err:'❌',info:'ℹ️'}[type]}</span> <span style="${c[type]}">${msg}</span>`;
+  t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.style.opacity = '0', 3500);
+}
+
+lucide.createIcons();
+</script>
+</body>
+</html>

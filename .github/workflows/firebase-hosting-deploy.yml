@@ -1,0 +1,59 @@
+# ══════════════════════════════════════════════════════════════
+#  GitHub Actions — Firebase Hosting Deploy
+#  Proyecto: tienda-e-ropa | PoloMamá
+#
+#  Triggers:
+#    • Push a "main"  → deploy a producción
+#    • Pull Request   → deploy a canal preview (URL temporal)
+# ══════════════════════════════════════════════════════════════
+
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # ─────────────────────────────────────────────
+  #  JOB 1: Deploy a Producción (push a main)
+  # ─────────────────────────────────────────────
+  deploy_production:
+    name: 🚀 Deploy Producción
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🔥 Deploy a Firebase Hosting (Producción)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken:         ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TIENDA_E_ROPA }}
+          channelId:         live
+          projectId:         tienda-e-ropa
+
+  # ─────────────────────────────────────────────
+  #  JOB 2: Preview en Pull Requests
+  # ─────────────────────────────────────────────
+  deploy_preview:
+    name: 👁️ Deploy Preview (PR)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🔥 Deploy Preview a Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken:         ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TIENDA_E_ROPA }}
+          projectId:         tienda-e-ropa
+          # channelId omitido → crea canal de preview automático con URL única

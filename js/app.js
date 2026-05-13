@@ -1,14 +1,18 @@
 /**
  * app.js — Main application entry point
- * Orchestrates all modules: Gallery, Cart, Animations.
+ * Orchestrates all modules: Firebase, Gallery, Cart, Animations.
  *
- * Firebase ready: uncomment initFirebase() when credentials are available.
+ * Firebase: activo — inicializado via js/firebase.js
  */
+
+// Instancias globales de Firebase (disponibles en todos los módulos)
+let _firebaseDB = null;
+let _firebaseApp = null;
 
 // ══ TOAST Notification ══
 function showToast(msg, duration = 2800) {
-  const toast  = document.getElementById('toast');
-  const msgEl  = document.getElementById('toast-msg');
+  const toast = document.getElementById('toast');
+  const msgEl = document.getElementById('toast-msg');
   msgEl.textContent = msg;
   toast.classList.remove('hidden', 'show');
   void toast.offsetWidth; // reflow
@@ -21,8 +25,8 @@ function showToast(msg, duration = 2800) {
 
 // ══ Cart Sidebar ══
 function openCart() {
-  const sidebar  = document.getElementById('cart-sidebar');
-  const overlay  = document.getElementById('cart-overlay');
+  const sidebar = document.getElementById('cart-sidebar');
+  const overlay = document.getElementById('cart-overlay');
   overlay.classList.remove('hidden');
   setTimeout(() => { overlay.style.opacity = '1'; }, 10);
   sidebar.style.transform = 'translateX(0)';
@@ -40,36 +44,31 @@ function closeCart() {
   }, 300);
 }
 
-// ══ Firebase Stub (uncomment & fill when ready) ══
-/*
-async function initFirebase() {
-  const firebaseConfig = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT.firebaseapp.com",
-    projectId:         "YOUR_PROJECT_ID",
-    storageBucket:     "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:             "YOUR_APP_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
-  // Products will be loaded via loadProducts() in data.js
-}
-*/
 
 // ══ APP INIT ══
 document.addEventListener('DOMContentLoaded', async () => {
 
-  // Init Lucide icons
+  // ── 1. Inicializar Firebase ──
+  try {
+    const fb = initFirebase();
+    _firebaseApp = fb.app;
+    _firebaseDB = fb.db;
+    trackEvent('page_view', { page: 'home', tienda: 'PoloMamá' });
+  } catch (err) {
+    console.warn('⚠️ Firebase no disponible, modo offline activo:', err.message);
+  }
+
+  // ── 2. Init Lucide icons ──
   lucide.createIcons();
 
-  // Animations
+  // ── 3. Animations ──
   initNavbar();
   initHeroAnimations();
   initPetals();
   initScrollReveal();
   initFloatingPromo();
 
-  // Gallery (async — Firebase ready)
+  // ── 4. Gallery (Firebase-ready) ──
   await initGallery();
 
   // Re-run scroll reveal after gallery painted

@@ -1,0 +1,16 @@
+{
+  "name": "tienda-de-ropa",
+  "version": "1.0.0",
+  "description": "PoloMamá — Tienda de polos personalizados para el Día de la Madre",
+  "main": "js/app.js",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "dependencies": {
+    "firebase": "^11.0.0"
+  },
+  "keywords": ["tienda", "ropa", "firebase", "bolivia"],
+  "author": "PoloMamá",
+  "license": "ISC"
+}
