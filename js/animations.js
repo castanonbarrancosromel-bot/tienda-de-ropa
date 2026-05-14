@@ -1,67 +1,59 @@
 /**
- * animations.js — Scroll Reveal, Navbar, Petals & Floating Promo
+ * animations.js — Navbar · Hero · Petals · ScrollReveal · FloatingPromo · CardSliders
+ *
+ * initCardSliders():
+ *   Usa IntersectionObserver para pausar sliders fuera del viewport
+ *   (ahorra CPU con 80 tarjetas) y reanudarlos al volver a ser visibles.
+ *   Se comunica con gallery.js exclusivamente via CustomEvents:
+ *     'slider:pause'  → gallery.js detiene el setInterval
+ *     'slider:resume' → gallery.js reactiva el setInterval
  */
 
-// ══ NAVBAR scroll effect ══
+/* ══ NAVBAR scroll effect ══ */
 function initNavbar() {
   const nav = document.getElementById('navbar');
+  if (!nav) return;
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 60) {
-      nav.classList.add('scrolled');
-    } else {
-      nav.classList.remove('scrolled');
-    }
+    nav.classList.toggle('scrolled', window.scrollY > 60);
   }, { passive: true });
 }
 
-// ══ Hero entrance animation ══
+/* ══ Hero entrance animations ══ */
 function initHeroAnimations() {
-  const els = document.querySelectorAll(
-    '.hero-subtitle, .hero-title, .hero-desc, .hero-btns'
-  );
-  els.forEach(el => {
-    el.classList.add('animate-hero');
-  });
+  document.querySelectorAll('.hero-subtitle, .hero-title, .hero-desc, .hero-btns')
+    .forEach(el => el.classList.add('animate-hero'));
 }
 
-// ══ Falling petals ══
+/* ══ Falling petals ══ */
 function initPetals() {
   const container = document.getElementById('petals');
-  const COUNT = 18;
-  for (let i = 0; i < COUNT; i++) {
-    const petal = document.createElement('div');
-    petal.className = 'petal';
-    const left = Math.random() * 100;
-    const delay = Math.random() * 8;
-    const duration = 6 + Math.random() * 8;
-    const size = 8 + Math.random() * 14;
-    petal.style.cssText = `
-      left:${left}%;
-      width:${size}px;
-      height:${size}px;
-      animation-duration:${duration}s;
-      animation-delay:${delay}s;
+  if (!container) return;
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.cssText = `
+      left:${Math.random() * 100}%;
+      width:${8  + Math.random() * 14}px;
+      height:${8 + Math.random() * 14}px;
+      animation-duration:${6  + Math.random() * 8}s;
+      animation-delay:${Math.random() * 8}s;
       opacity:${0.5 + Math.random() * 0.5};
     `;
-    container.appendChild(petal);
+    container.appendChild(p);
   }
 }
 
-// ══ Scroll Reveal ══
+/* ══ Scroll Reveal ══ */
 function initScrollReveal() {
-  const targets = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
-      }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
     });
   }, { threshold: 0.15 });
-  targets.forEach(el => observer.observe(el));
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 }
 
-// ══ Floating promo messages ══
+/* ══ Floating promo banner ══ */
 function initFloatingPromo() {
   const messages = [
     '¡Cómprale algo especial a Mamá! 💝',
@@ -69,90 +61,73 @@ function initFloatingPromo() {
     '¡Haz que ella sonría hoy! ✨',
     'El amor se regala con estilo 👑',
   ];
-  let idx = 0;
-  const textEl = document.getElementById('promo-text');
-  const promoEl = document.getElementById('float-promo');
 
-  // Cycle messages
+  const textEl  = document.getElementById('promo-text');
+  const promoEl = document.getElementById('float-promo');
+  if (!textEl || !promoEl) return;
+
+  let idx = 0;
+  textEl.style.transition = 'opacity 0.4s, transform 0.4s';
+
   setInterval(() => {
-    textEl.style.opacity = '0';
+    textEl.style.opacity   = '0';
     textEl.style.transform = 'translateY(5px)';
     setTimeout(() => {
       idx = (idx + 1) % messages.length;
-      textEl.textContent = messages[idx];
-      textEl.style.opacity = '1';
+      textEl.textContent     = messages[idx];
+      textEl.style.opacity   = '1';
       textEl.style.transform = 'translateY(0)';
     }, 400);
   }, 3500);
 
-  textEl.style.transition = 'opacity 0.4s, transform 0.4s';
-
-  // Close button
-  document.getElementById('close-promo').addEventListener('click', () => {
-    promoEl.style.opacity = '0';
-    promoEl.style.transform = 'scale(0.8)';
-    promoEl.style.transition = 'all 0.3s';
-    setTimeout(() => { promoEl.style.display = 'none'; }, 300);
+  document.getElementById('close-promo')?.addEventListener('click', () => {
+    promoEl.style.cssText += 'opacity:0;transform:scale(0.8);transition:all 0.3s';
+    setTimeout(() => promoEl.style.display = 'none', 300);
   });
 
-  // Click navigates to gallery
-  promoEl.querySelector('.float-promo-inner').addEventListener('click', (e) => {
+  promoEl.querySelector('.float-promo-inner')?.addEventListener('click', (e) => {
     if (e.target.id === 'close-promo') return;
-    document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' });
   });
 }
 
-// ══ Card Slider Visibility Observer ══
-/**
- * initCardSliders()
- * Usa IntersectionObserver para activar el auto-play de los sliders
- * solo cuando la tarjeta entra en el viewport.
- * Llámalo después de que las tarjetas estén en el DOM.
- * gallery.js llama a initSlider() individualmente por tarjeta,
- * pero este observer re-activa el auto-play si el usuario sale
- * y vuelve a la sección del catálogo.
+/* ══ Card Slider Visibility Observer ══
+ *
+ * CÓMO FUNCIONA:
+ *   1. Observa cada .product-card con IntersectionObserver.
+ *   2. Cuando una tarjeta sale del viewport  → dispara 'slider:pause'  al .img-slider.
+ *   3. Cuando una tarjeta entra al viewport  → dispara 'slider:resume' al .img-slider.
+ *   4. gallery.js escucha esos eventos en cada .img-slider y gestiona su propio timer.
+ *   5. MutationObserver observa tarjetas nuevas (tras filtrar/buscar).
+ *
+ * SIN acoplamiento directo a _sliderTimers ni a ninguna variable de gallery.js.
  */
 function initCardSliders() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const slider = entry.target.querySelector('.img-slider');
-      if (!slider) return;
-      const pid = slider.dataset.pid;
-      if (!pid) return;
-
-      if (entry.isIntersecting) {
-        // Tarjeta visible: activar auto-play si no está corriendo
-        if (!_sliderTimers[pid]) {
-          // Solo activa si initSlider ya fue llamado (total=2)
-          // Usamos un CustomEvent para señalar a gallery.js
-          slider.dispatchEvent(new CustomEvent('slider:resume', { bubbles: false }));
-        }
-      } else {
-        // Tarjeta fuera de vista: pausar para ahorrar recursos
-        if (_sliderTimers[pid]) {
-          clearInterval(_sliderTimers[pid]);
-          delete _sliderTimers[pid];
-        }
-      }
-    });
-  }, { threshold: 0.2 });
-
-  // Observar todas las tarjetas presentes y futuras
-  // Para tarjetas ya en el DOM:
-  document.querySelectorAll('.product-card').forEach(card => observer.observe(card));
-
-  // MutationObserver para observar tarjetas añadidas dinámicamente
   const grid = document.getElementById('product-grid');
-  if (grid) {
-    const mutObs = new MutationObserver(mutations => {
-      mutations.forEach(m => {
-        m.addedNodes.forEach(node => {
-          if (node.nodeType === 1 && node.classList.contains('product-card')) {
-            observer.observe(node);
-          }
-        });
+  if (!grid) return;
+
+  const dispatch = (card, eventName) => {
+    const slider = card.querySelector('.img-slider');
+    if (slider) slider.dispatchEvent(new CustomEvent(eventName, { bubbles: false }));
+  };
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      dispatch(e.target, e.isIntersecting ? 'slider:resume' : 'slider:pause');
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px 100px 0px' });
+
+  // Observar tarjetas ya en el DOM
+  grid.querySelectorAll('.product-card').forEach(c => obs.observe(c));
+
+  // Observar tarjetas añadidas dinámicamente (filtros / búsqueda)
+  new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (node.nodeType === 1 && node.classList.contains('product-card')) {
+          obs.observe(node);
+        }
       });
     });
-    mutObs.observe(grid, { childList: true });
-  }
+  }).observe(grid, { childList: true });
 }

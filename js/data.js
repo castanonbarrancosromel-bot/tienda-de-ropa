@@ -18,16 +18,49 @@ function getSB() {
   return _sb;
 }
 
-// ── Simulated product database (replace with Firebase fetch) ──
-// Mapa: imagen de prenda → imagen de modelo
-const MODEL_IMAGE_MAP = {
-  'assets/images/polo_floral.png':    'assets/images/model_polo_floral.png',
-  'assets/images/polo_corazon.png':   'assets/images/model_polo_corazon.png',
-  'assets/images/polo_mariposa.png':  'assets/images/model_polo_mariposa.png',
-  'assets/images/polo_amor.png':      'assets/images/model_polo_amor.png',
-  'assets/images/polo_rosas.png':     'assets/images/model_polo_rosas.png',
-  'assets/images/polo_family.png':    'assets/images/model_polo_family.png',
+// ── Imágenes base del catálogo ──
+// Usa rutas locales cuando existen; el navegador muestra el placeholder animado si no.
+// Para activar imágenes reales: ejecuta copiar_modelos.ps1
+
+// Helpers de imágenes inline (se muestran si el archivo local no existe)
+const _IMG = {
+  floral:    'https://images.unsplash.com/photo-1594938298603-c8148d0a8388?w=600&h=600&fit=crop&q=80',
+  corazon:   'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=600&fit=crop&q=80',
+  mariposa:  'https://images.unsplash.com/photo-1551803091-e20673f15770?w=600&h=600&fit=crop&q=80',
+  amor:      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&h=600&fit=crop&q=80',
+  rosas:     'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=600&h=600&fit=crop&q=80',
+  family:    'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&h=600&fit=crop&q=80',
+  // Modelos
+  m_floral:  'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=600&h=700&fit=crop&q=80',
+  m_corazon: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=700&fit=crop&q=80',
+  m_marip:   'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&h=700&fit=crop&q=80',
+  m_amor:    'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600&h=700&fit=crop&q=80',
+  m_rosas:   'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=600&h=700&fit=crop&q=80',
+  m_family:  'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=600&h=700&fit=crop&q=80',
 };
+
+// Mapa: ruta local de prenda → URL Unsplash de MODELO
+// (se usa en buildCard() como slide 0)
+const MODEL_IMAGE_MAP = {
+  'assets/images/polo_floral.png':    _IMG.m_floral,
+  'assets/images/polo_corazon.png':   _IMG.m_corazon,
+  'assets/images/polo_mariposa.png':  _IMG.m_marip,
+  'assets/images/polo_amor.png':      _IMG.m_amor,
+  'assets/images/polo_rosas.png':     _IMG.m_rosas,
+  'assets/images/polo_family.png':    _IMG.m_family,
+};
+
+// Mapa: ruta local de prenda → URL Unsplash de PRENDA
+// (se usa en buildCard() como slide 1 cuando el archivo local no existe)
+const PRENDA_IMAGE_MAP = {
+  'assets/images/polo_floral.png':    _IMG.floral,
+  'assets/images/polo_corazon.png':   _IMG.corazon,
+  'assets/images/polo_mariposa.png':  _IMG.mariposa,
+  'assets/images/polo_amor.png':      _IMG.amor,
+  'assets/images/polo_rosas.png':     _IMG.rosas,
+  'assets/images/polo_family.png':    _IMG.family,
+};
+
 
 const PRODUCTS_DB = [
   // ── BESTSELLERS ──
