@@ -132,8 +132,11 @@ function initFlowerCanvas() {
   const ctx = canvas.getContext('2d');
 
   const PAL = [
-    ['#F4D0D6','#E8A0AA'], ['#FADADD','#F4A0B0'],
-    ['#F9E4D4','#E8C4A0'], ['#FFE8EE','#F4B8C8'], ['#FFF0F5','#DDA0B8'],
+    ['#F48FB1','#E91E8C'], // rosa vibrante
+    ['#FFD700','#D4AF37'], // dorado
+    ['#FCE4EC','#F48FB1'], // rosa pastel
+    ['#FFF9C4','#F0D060'], // dorado claro
+    ['#FFFFFF','#F8BBD0'], // blanco-rosa
   ];
 
   function nz(x,y,t){ return Math.sin(x*.8+t*.4)*Math.cos(y*.6+t*.3)*.5+Math.sin(x*.3-t*.2)*Math.cos(y*1.1+t*.5)*.3; }
