@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNavbar();
   initHeroAnimations();
   initPetals();
+  initFlowerCanvas(); // Canvas: flores interactivas con mouse
   initScrollReveal();
   initFloatingPromo();
 
