@@ -55,11 +55,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   initScrollReveal();
   initFloatingPromo();
 
-  // ── 4. Gallery (Firebase-ready) ──
+  // ── 4. Gallery (Supabase-ready) ──
   await initGallery();
 
-  // Re-run scroll reveal after gallery painted
-  setTimeout(initScrollReveal, 400);
+  // Re-run scroll reveal + activar observer de sliders tras pintar galería
+  setTimeout(() => {
+    initScrollReveal();
+    initCardSliders(); // animations.js: pausa/reanuda sliders según visibilidad
+  }, 400);
 
   // ── Cart sidebar events ──
   document.getElementById('cart-btn').addEventListener('click', openCart);

@@ -204,33 +204,31 @@
 
 <script>
 // ═══════════════════════════════════════════════
-//  ⚙️  CONFIGURACIÓN — Pega tus credenciales aquí
+//  ⚙️  CONFIGURACIÓN
 // ═══════════════════════════════════════════════
-// ⚠️ La clave aquí abajo DEBE ser la "anon public key" de:
-//    https://supabase.com/dashboard/project/qipivftteapqbagtjicn/settings/api
-//    (empieza con eyJ...)
 const SUPABASE_URL  = 'https://qipivftteapqbagtjicn.supabase.co';
-const SUPABASE_KEY  = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE'; // ← reemplazar con anon key
+const SUPABASE_KEY  = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE'; // Publishable Key
 const TABLE_NAME    = 'products';
 // ═══════════════════════════════════════════════
 
-// Init Supabase — verificar que la key sea JWT válido
+// Init Supabase — acepta JWT (eyJ...) y Publishable Key (sb_publishable_...)
 const { createClient } = window.supabase;
 let sb;
 try {
-  if (!SUPABASE_KEY.startsWith('eyJ')) {
-    throw new Error('La SUPABASE_KEY no es un JWT válido. Debes usar la "anon public key" de tu proyecto.');
+  const isValidKey = SUPABASE_KEY.startsWith('eyJ') || SUPABASE_KEY.startsWith('sb_publishable_');
+  if (!isValidKey) {
+    throw new Error('La SUPABASE_KEY no tiene un formato válido.');
   }
   sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  console.log('✅ Supabase inicializado correctamente');
 } catch(e) {
   console.error('❌ Error Supabase:', e.message);
-  // Mostrar alerta visual en el panel
   document.addEventListener('DOMContentLoaded', () => {
     const errDiv = document.createElement('div');
     errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:#fff;padding:12px 20px;text-align:center;z-index:9999;font-size:13px;';
-    errDiv.innerHTML = `❌ <strong>Error de configuración Supabase:</strong> La clave API no es válida. 
-      Ve a <a href="https://supabase.com/dashboard/project/qipivftteapqbagtjicn/settings/api" target="_blank" style="color:#fff;text-decoration:underline">Supabase Dashboard</a> 
-      y copia la <strong>anon public key</strong> (empieza con eyJ...)`;
+    errDiv.innerHTML = `❌ <strong>Error de configuración Supabase:</strong> Clave API no válida.
+      Ve a <a href="https://supabase.com/dashboard/project/qipivftteapqbagtjicn/settings/api" target="_blank" style="color:#fff;text-decoration:underline">Supabase Dashboard</a>
+      y copia la <strong>anon public key</strong>.`;
     document.body.prepend(errDiv);
   });
 }

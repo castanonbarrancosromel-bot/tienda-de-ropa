@@ -4,16 +4,15 @@
  */
 
 // ══ SUPABASE CONFIG ══
-// ⚠️ IMPORTANTE: Reemplaza con tu anon key real de:
-//    https://supabase.com/dashboard/project/qipivftteapqbagtjicn/settings/api
 const SUPABASE_URL  = 'https://qipivftteapqbagtjicn.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE'; // ← reemplazar con anon key JWT
+const SUPABASE_ANON = 'sb_publishable_MQuH2oWHRqpzHTS2SGXcDg_EN53l-JE'; // Publishable Key
 const SB_TABLE      = 'products';
 
 let _sb = null;
 function getSB() {
-  // La anon key real de Supabase empieza con 'eyJ' (JWT)
-  if (!_sb && SUPABASE_ANON.startsWith('eyJ') && SUPABASE_URL.includes('supabase.co')) {
+  // Acepta tanto JWT (eyJ...) como el nuevo formato Publishable Key (sb_publishable_...)
+  const isValid = SUPABASE_ANON.startsWith('eyJ') || SUPABASE_ANON.startsWith('sb_publishable_');
+  if (!_sb && isValid && SUPABASE_URL.includes('supabase.co')) {
     _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   }
   return _sb;

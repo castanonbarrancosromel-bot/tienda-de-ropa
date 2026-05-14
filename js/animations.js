@@ -101,3 +101,58 @@ function initFloatingPromo() {
     document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
   });
 }
+
+// ══ Card Slider Visibility Observer ══
+/**
+ * initCardSliders()
+ * Usa IntersectionObserver para activar el auto-play de los sliders
+ * solo cuando la tarjeta entra en el viewport.
+ * Llámalo después de que las tarjetas estén en el DOM.
+ * gallery.js llama a initSlider() individualmente por tarjeta,
+ * pero este observer re-activa el auto-play si el usuario sale
+ * y vuelve a la sección del catálogo.
+ */
+function initCardSliders() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const slider = entry.target.querySelector('.img-slider');
+      if (!slider) return;
+      const pid = slider.dataset.pid;
+      if (!pid) return;
+
+      if (entry.isIntersecting) {
+        // Tarjeta visible: activar auto-play si no está corriendo
+        if (!_sliderTimers[pid]) {
+          // Solo activa si initSlider ya fue llamado (total=2)
+          // Usamos un CustomEvent para señalar a gallery.js
+          slider.dispatchEvent(new CustomEvent('slider:resume', { bubbles: false }));
+        }
+      } else {
+        // Tarjeta fuera de vista: pausar para ahorrar recursos
+        if (_sliderTimers[pid]) {
+          clearInterval(_sliderTimers[pid]);
+          delete _sliderTimers[pid];
+        }
+      }
+    });
+  }, { threshold: 0.2 });
+
+  // Observar todas las tarjetas presentes y futuras
+  // Para tarjetas ya en el DOM:
+  document.querySelectorAll('.product-card').forEach(card => observer.observe(card));
+
+  // MutationObserver para observar tarjetas añadidas dinámicamente
+  const grid = document.getElementById('product-grid');
+  if (grid) {
+    const mutObs = new MutationObserver(mutations => {
+      mutations.forEach(m => {
+        m.addedNodes.forEach(node => {
+          if (node.nodeType === 1 && node.classList.contains('product-card')) {
+            observer.observe(node);
+          }
+        });
+      });
+    });
+    mutObs.observe(grid, { childList: true });
+  }
+}

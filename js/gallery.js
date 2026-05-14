@@ -1,70 +1,90 @@
 /**
  * gallery.js — Renderiza productos con slider modelo → prenda
  * Slide 1: Modelo usando la prenda | Slide 2: Prenda sola
+ *
+ * ESTRUCTURA CSS del slider:
+ *   .img-slider { overflow:hidden; width:100% }
+ *     └─ .slider-track { display:flex; width:200%; }  ← 2 slides lado a lado
+ *           ├─ .slider-slide { flex: 0 0 50%; }       ← cada slide = 50% del track = 100% visible
+ *           └─ .slider-slide { flex: 0 0 50%; }
+ *
+ * FÓRMULA: translateX(-(index * 50%)) sobre el track de 200%
+ *   index=0 → translateX(0%)    → slide modelo visible
+ *   index=1 → translateX(-50%)  → slide prenda visible
  */
 
 let allProducts = [];
 let activeFilter = 'all';
 
-// ── Auto-play registry (para limpiar timers al re-render) ──
+// ── Auto-play registry ──
 const _sliderTimers = {};
 
-// ── Slider logic ──
+// ──────────────────────────────────────────
+// goToSlide: mueve el track al slide indicado
+// Usa -50% por índice porque el track mide 200%
+// ──────────────────────────────────────────
 function goToSlide(productId, index) {
   const wrap = document.querySelector(`.img-slider[data-pid="${productId}"]`);
   if (!wrap) return;
   const track = wrap.querySelector('.slider-track');
   const dots  = wrap.querySelectorAll('.slider-dot');
-  track.style.transform = `translateX(-${index * 100}%)`;
+
+  // Cada slide ocupa el 50% del track (que mide 200%).
+  // index=0 → 0%, index=1 → -50%
+  track.style.transform = `translateX(-${index * 50}%)`;
+
   dots.forEach((d, i) => d.classList.toggle('active', i === index));
-  wrap.dataset.current = index;
+  wrap.dataset.current = String(index);
 }
 
+// ──────────────────────────────────────────
+// initSlider: activa controles, auto-play y swipe táctil
+// ──────────────────────────────────────────
 function initSlider(productId, total) {
   const wrap = document.querySelector(`.img-slider[data-pid="${productId}"]`);
   if (!wrap || total < 2) return;
 
   let current = 0;
-  wrap.dataset.current = 0;
 
-  // Dots click
+  // Helper: avanzar/retroceder
+  const go = (idx) => { current = idx; goToSlide(productId, current); };
+  const next = () => go((current + 1) % total);
+  const prev = () => go((current - 1 + total) % total);
+
+  // ── Puntos ──
   wrap.querySelectorAll('.slider-dot').forEach((dot, i) => {
-    dot.addEventListener('click', (e) => {
-      e.stopPropagation();
-      current = i;
-      goToSlide(productId, current);
-    });
+    dot.addEventListener('click', (e) => { e.stopPropagation(); go(i); });
   });
 
-  // Arrow buttons
+  // ── Flechas ──
   const prevBtn = wrap.querySelector('.slider-arrow.prev');
   const nextBtn = wrap.querySelector('.slider-arrow.next');
-  if (prevBtn) prevBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    current = (current - 1 + total) % total;
-    goToSlide(productId, current);
-  });
-  if (nextBtn) nextBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    current = (current + 1) % total;
-    goToSlide(productId, current);
-  });
+  prevBtn?.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
+  nextBtn?.addEventListener('click', (e) => { e.stopPropagation(); next(); });
 
-  // Auto-play: empieza en slide 0 (modelo), pasa a slide 1 (prenda) a los 2.5s
-  if (_sliderTimers[productId]) clearInterval(_sliderTimers[productId]);
-  _sliderTimers[productId] = setInterval(() => {
-    current = (current + 1) % total;
-    goToSlide(productId, current);
-  }, 2800);
+  // ── Swipe táctil (móvil) ──
+  let touchStartX = 0;
+  wrap.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  wrap.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) { diff > 0 ? next() : prev(); }
+  }, { passive: true });
 
-  // Pause on hover
+  // ── Auto-play cada 2.8s ──
+  const startAutoPlay = () => {
+    if (_sliderTimers[productId]) clearInterval(_sliderTimers[productId]);
+    _sliderTimers[productId] = setInterval(next, 2800);
+  };
+  startAutoPlay();
+
+  // ── Pausar al hover, reanudar al salir ──
   wrap.addEventListener('mouseenter', () => clearInterval(_sliderTimers[productId]));
-  wrap.addEventListener('mouseleave', () => {
-    _sliderTimers[productId] = setInterval(() => {
-      current = (current + 1) % total;
-      goToSlide(productId, current);
-    }, 2800);
-  });
+  wrap.addEventListener('mouseleave', startAutoPlay);
+
+  // Posición inicial
+  goToSlide(productId, 0);
 }
 
 /**
@@ -78,51 +98,68 @@ async function initGallery() {
   initSearch();
 }
  
-// ── Build product card HTML ──
+// ──────────────────────────────────────────
+// buildCard: construye la tarjeta con slider 2 slides
+// Slide 0: modelo con la prenda
+// Slide 1: prenda sola
+// Si la imagen de modelo no existe aún, usa un placeholder
+// elegante con gradiente y texto hasta que se copien las fotos
+// ──────────────────────────────────────────
 function buildCard(product) {
   const badgeMap = {
     bestseller: { cls: 'badge-bestseller', label: '⭐ Más Vendido' },
     new:        { cls: 'badge-new',        label: '✨ Nuevo' },
     sale:       { cls: 'badge-sale',       label: '🏷️ Oferta' },
   };
-  const badge = badgeMap[product.badge] || null;
+  const badge      = badgeMap[product.badge] || null;
   const oldPriceHtml = product.oldPrice
     ? `<span class="product-price-old">Bs. ${product.oldPrice}</span>` : '';
-  const sizesHtml = product.sizes.map(s =>
+  const sizesHtml  = product.sizes.map(s =>
     `<button class="size-btn" data-size="${s}" onclick="selectSize(this, ${product.id})">${s}</button>`
   ).join('');
 
-  // Determinar imagen del modelo
+  // ── Resolver imagen de modelo ──
+  // Prioridad: modelImage explícito > MODEL_IMAGE_MAP > placeholder CSS
   const modelImg = product.modelImage
     || (typeof MODEL_IMAGE_MAP !== 'undefined' ? MODEL_IMAGE_MAP[product.image] : null)
-    || product.image;
+    || null; // null → se usará el placeholder CSS
 
-  const slides = [
-    { src: modelImg,      label: '📸 Modelo' },
-    { src: product.image, label: '👗 Prenda'  },
-  ];
+  // ── Slide 0: Modelo ──
+  // Si modelImg existe → <img>; si no → placeholder con estilo hasta que se copien las fotos
+  const modelSlideContent = modelImg
+    ? `<img src="${modelImg}" alt="Modelo usando ${product.name}" loading="lazy"
+            onerror="this.parentElement.classList.add('slide-no-model')" />
+       <span class="slide-label">📸 Modelo</span>`
+    : `<div class="slide-model-placeholder">
+         <span class="placeholder-icon">👗</span>
+         <p class="placeholder-text">Foto de modelo<br/><em>próximamente</em></p>
+       </div>
+       <span class="slide-label">📸 Modelo</span>`;
 
-  const slidesHtml = slides.map(s =>
-    `<div class="slider-slide">
-       <img src="${s.src}" alt="${product.name}" loading="lazy" />
-       <span class="slide-label">${s.label}</span>
-     </div>`
-  ).join('');
+  // ── Slide 1: Prenda sola ──
+  const prendaSlideContent =
+    `<img src="${product.image}" alt="${product.name}" loading="lazy" />
+     <span class="slide-label">👗 Prenda</span>`;
 
-  const dotsHtml = slides.map((_, i) =>
-    `<button class="slider-dot${i === 0 ? ' active' : ''}" aria-label="Slide ${i+1}"></button>`
-  ).join('');
+  const slidesHtml =
+    `<div class="slider-slide">${modelSlideContent}</div>
+     <div class="slider-slide">${prendaSlideContent}</div>`;
+
+  const dotsHtml =
+    `<button class="slider-dot active" aria-label="Ver modelo"></button>
+     <button class="slider-dot"         aria-label="Ver prenda"></button>`;
 
   const card = document.createElement('article');
-  card.className = 'product-card';
-  card.dataset.id = product.id;
+  card.className  = 'product-card';
+  card.dataset.id   = product.id;
   card.dataset.tags = product.tags.join(',');
+
   card.innerHTML = `
     <div class="product-img-wrap">
       <div class="img-slider" data-pid="${product.id}" data-current="0">
         <div class="slider-track">${slidesHtml}</div>
-        <button class="slider-arrow prev" aria-label="Anterior">‹</button>
-        <button class="slider-arrow next" aria-label="Siguiente">›</button>
+        <button class="slider-arrow prev" aria-label="Anterior">&#8249;</button>
+        <button class="slider-arrow next" aria-label="Siguiente">&#8250;</button>
         <div class="slider-dots">${dotsHtml}</div>
       </div>
       ${badge ? `<span class="product-badge ${badge.cls}">${badge.label}</span>` : ''}
