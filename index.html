@@ -75,37 +75,41 @@
 
   <!-- ═══════════════ HERO ═══════════════ -->
   <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
-    <!-- Background -->
+    <!-- Background degradado -->
     <div class="hero-bg absolute inset-0"></div>
     <!-- Canvas flores interactivas -->
     <canvas id="flower-canvas" class="absolute inset-0 pointer-events-none"></canvas>
     <!-- Petals -->
     <div class="petal-container absolute inset-0 pointer-events-none" id="petals"></div>
+    <!-- Jardín de rosas SVG (se genera con JS) -->
+    <div id="rose-garden"></div>
     <!-- Content -->
-    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
-      <p class="hero-subtitle font-mont text-sm uppercase tracking-[0.3em] text-gold-light mb-4 opacity-0">Día de la
-        Madre 2026</p>
-      <h1 class="hero-title font-playfair text-5xl md:text-7xl font-bold text-white leading-tight mb-6 opacity-0">
-        El regalo perfecto<br /><em class="text-gold-light">para Mamá</em>
+    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto" style="padding-bottom:160px">
+      <p class="hero-subtitle font-mont text-sm uppercase tracking-[0.3em] mb-4 opacity-0"
+         style="color:#F0D060">Día de la Madre 2026</p>
+      <h1 class="hero-title font-playfair text-5xl md:text-7xl font-bold text-white leading-tight mb-6 opacity-0"
+          style="text-shadow:0 4px 24px rgba(74,20,140,0.4)">
+        El regalo perfecto<br/><em style="color:#F8BBD0">para Mamá</em>
       </h1>
-      <p class="hero-desc font-mont text-lg text-white/80 mb-10 max-w-xl mx-auto opacity-0">
-        Polos personalizados con diseños únicos que expresan todo el amor que sientes. Calidad premium, entrega en toda
-        Bolivia.
+      <p class="hero-desc font-mont text-lg text-white/90 mb-10 max-w-xl mx-auto opacity-0">
+        Polos personalizados con diseños únicos que expresan todo el amor que sientes.
+        Calidad premium, entrega en toda Bolivia.
       </p>
       <div class="hero-btns flex flex-col sm:flex-row gap-4 justify-center opacity-0">
         <a href="#gallery"
-          class="bg-white text-rose-quartz font-semibold px-8 py-4 rounded-full hover:bg-rose-light transition-all hover:scale-105 shadow-lg">
+          style="background:linear-gradient(135deg,#E91E8C,#C2185B);color:white"
+          class="font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-xl">
           Ver Colección ✨
         </a>
-        <a href="https://wa.me/59170000000?text=Hola!%20Quiero%20un%20polo%20personalizado%20para%20el%20D%C3%ADa%20de%20la%20Madre"
+        <a href="https://wa.me/59170000000?text=Hola!%20Quiero%20un%20polo%20para%20el%20D%C3%ADa%20de%20la%20Madre"
           target="_blank"
-          class="bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-full hover:bg-white/20 transition-all hover:scale-105">
+          class="bg-white/20 backdrop-blur-sm border-2 border-white/60 text-white font-semibold px-8 py-4 rounded-full hover:bg-white/30 transition-all hover:scale-105">
           Pedir por WhatsApp
         </a>
       </div>
     </div>
     <!-- Scroll hint -->
-    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-white/60">
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce" style="color:rgba(248,187,208,0.8);z-index:10">
       <i data-lucide="chevrons-down" class="w-6 h-6"></i>
     </div>
   </section>

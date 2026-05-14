@@ -1,6 +1,85 @@
 /**
- * animations.js — Navbar · Hero · Petals · ScrollReveal · FloatingPromo · CardSliders · FlowerCanvas
+ * animations.js — Navbar · Hero · Petals · ScrollReveal · FloatingPromo · CardSliders · FlowerCanvas · RoseGarden
  */
+
+/* ══ ROSE GARDEN SVG — Jardín de rosas en la base del hero ══ */
+function initRoseGarden() {
+  const el = document.getElementById('rose-garden');
+  if (!el) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const mk = (tag, attrs) => {
+    const e = document.createElementNS(ns, tag);
+    for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+    return e;
+  };
+
+  function makeRose(svg, cx, cy, r, c1, c2) {
+    svg.appendChild(mk('circle',{cx,cy,r:r*1.5,fill:c1,opacity:'0.10'}));
+    for (let i=0;i<5;i++){
+      const a=(i/5)*Math.PI*2;
+      const px=cx+Math.cos(a)*r*1.1, py=cy+Math.sin(a)*r*1.1;
+      svg.appendChild(mk('ellipse',{cx:px,cy:py,rx:r*0.62,ry:r*0.42,
+        fill:i%2===0?c1:c2,opacity:'0.88',
+        transform:`rotate(${a*180/Math.PI+90},${px},${py})`}));
+    }
+    svg.appendChild(mk('circle',{cx,cy,r:r*0.68,fill:c2}));
+    svg.appendChild(mk('circle',{cx,cy,r:r*0.33,fill:c1}));
+    svg.appendChild(mk('circle',{cx,cy,r:r*0.13,fill:'#4A148C',opacity:'0.55'}));
+  }
+
+  function makeLeaf(svg,cx,cy,rx,ry,angle){
+    svg.appendChild(mk('ellipse',{cx,cy,rx,ry,fill:'#2D6A2D',opacity:'0.80',
+      transform:`rotate(${angle},${cx},${cy})`}));
+  }
+
+  function makeBush(svg, x, groundY, height, sc, roses) {
+    const sw=sc*3.5;
+    svg.appendChild(mk('path',{
+      d:`M${x},${groundY} C${x-sw},${groundY-height*0.3} ${x-sw*1.5},${groundY-height*0.6} ${x-sw*0.8},${groundY-height}`,
+      stroke:'#5D3A1A','stroke-width':sw,fill:'none','stroke-linecap':'round'}));
+    [{t:.44,ox:-height*.17},{t:.65,ox:height*.19},{t:.82,ox:-height*.13}].forEach(b=>{
+      const by=groundY-height*b.t, bx=x+b.ox;
+      svg.appendChild(mk('path',{
+        d:`M${x-sw*.6},${by} Q${(x+bx)/2},${by-height*.03} ${bx},${by-height*.06}`,
+        stroke:'#5D3A1A','stroke-width':sw*.6,fill:'none','stroke-linecap':'round'}));
+      makeLeaf(svg,bx,by-height*.03,sc*8,sc*3.5,b.ox>0?30:-30);
+    });
+    makeLeaf(svg,x-sw*2,groundY-height*.38,sc*10,sc*4,-38);
+    makeLeaf(svg,x+sw,  groundY-height*.52,sc*9, sc*3.8, 28);
+    roses.forEach(r=>{
+      makeRose(svg,x-sw*.8+r.dx*sc, groundY-height*r.ht, r.r*sc, r.c1, r.c2);
+    });
+  }
+
+  const W=1440, H=260;
+  const svg=mk('svg',{xmlns:ns,viewBox:`0 0 ${W} ${H}`,
+    preserveAspectRatio:'xMidYMax meet',style:`width:100%;height:${H}px;display:block;`});
+
+  const defs=mk('defs',{});
+  const g=mk('linearGradient',{id:'gnd2',x1:'0',y1:'0',x2:'0',y2:'1'});
+  g.appendChild(mk('stop',{offset:'0%','stop-color':'#1E5E1E'}));
+  g.appendChild(mk('stop',{offset:'100%','stop-color':'#14521A'}));
+  defs.appendChild(g); svg.appendChild(defs);
+  svg.appendChild(mk('ellipse',{cx:'720',cy:'250',rx:'780',ry:'20',fill:'#1A6B1A',opacity:'0.45'}));
+  svg.appendChild(mk('rect',{x:'0',y:'246',width:'1440',height:'14',fill:'url(#gnd2)'}));
+
+  const M1='#E91E8C',M2='#C2185B',P1='#FCE4EC',P2='#F48FB1';
+  [
+    {x:55,  h:H*.72,sc:.85,r:[{dx:0,ht:1.0,r:11,c1:M1,c2:M2},{dx:-14,ht:.55,r:8,c1:P1,c2:P2},{dx:12,ht:.46,r:7,c1:M1,c2:M2}]},
+    {x:175, h:H*.44,sc:.65,r:[{dx:0,ht:1.0,r:9,c1:P1,c2:P2},{dx:12,ht:.55,r:6,c1:M1,c2:M2}]},
+    {x:308, h:H*.92,sc:1.1, r:[{dx:0,ht:1.0,r:14,c1:M1,c2:M2},{dx:-22,ht:.52,r:10,c1:P1,c2:P2},{dx:24,ht:.48,r:9,c1:M1,c2:M2},{dx:-14,ht:.73,r:8,c1:P1,c2:P2},{dx:10,ht:.83,r:7,c1:M1,c2:M2}]},
+    {x:445, h:H*.38,sc:.60,r:[{dx:0,ht:1.0,r:8,c1:M1,c2:M2},{dx:-10,ht:.52,r:5,c1:P1,c2:P2}]},
+    {x:578, h:H*.62,sc:.82,r:[{dx:0,ht:1.0,r:11,c1:P1,c2:P2},{dx:16,ht:.55,r:7,c1:M1,c2:M2},{dx:-14,ht:.48,r:7,c1:P1,c2:P2}]},
+    {x:730, h:H*.97,sc:1.2, r:[{dx:0,ht:1.0,r:16,c1:M1,c2:M2},{dx:-28,ht:.52,r:11,c1:P1,c2:P2},{dx:28,ht:.48,r:10,c1:M1,c2:M2},{dx:-16,ht:.76,r:9,c1:P1,c2:P2},{dx:16,ht:.81,r:8,c1:M1,c2:M2},{dx:0,ht:.62,r:7,c1:P1,c2:P2}]},
+    {x:878, h:H*.40,sc:.62,r:[{dx:0,ht:1.0,r:8,c1:P1,c2:P2},{dx:10,ht:.5,r:5,c1:M1,c2:M2}]},
+    {x:1010,h:H*.78,sc:.95,r:[{dx:0,ht:1.0,r:13,c1:M1,c2:M2},{dx:-20,ht:.53,r:9,c1:P1,c2:P2},{dx:18,ht:.47,r:8,c1:M1,c2:M2},{dx:-8,ht:.75,r:7,c1:P1,c2:P2}]},
+    {x:1160,h:H*.55,sc:.75,r:[{dx:0,ht:1.0,r:10,c1:P1,c2:P2},{dx:14,ht:.52,r:7,c1:M1,c2:M2},{dx:-12,ht:.48,r:6,c1:P1,c2:P2}]},
+    {x:1295,h:H*.38,sc:.58,r:[{dx:0,ht:1.0,r:8,c1:M1,c2:M2}]},
+    {x:1400,h:H*.60,sc:.78,r:[{dx:0,ht:1.0,r:11,c1:P1,c2:P2},{dx:-12,ht:.52,r:7,c1:M1,c2:M2}]},
+  ].forEach(b=>makeBush(svg,b.x,H-5,b.h,b.sc,b.r));
+
+  el.appendChild(svg);
+}
 
 /* ══ NAVBAR scroll effect ══ */
 function initNavbar() {

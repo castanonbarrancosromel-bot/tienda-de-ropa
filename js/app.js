@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNavbar();
   initHeroAnimations();
   initPetals();
+  initRoseGarden();    // SVG: jardín de rosas en la base del hero
   initFlowerCanvas(); // Canvas: flores interactivas con mouse
   initScrollReveal();
   initFloatingPromo();

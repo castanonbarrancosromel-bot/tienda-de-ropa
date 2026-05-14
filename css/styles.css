@@ -1,24 +1,28 @@
 /* ══════════════════════════════════════════
    PoloMamá – Premium Stylesheet
-   Paleta: Dorado · Rosa · Blanco
+   Paleta: Morado · Rosa Bebé · Blanco
    ══════════════════════════════════════════ */
 
 :root {
-  /* ── Dorado ── */
-  --gold:         #D4AF37;
-  --gold-light:   #F0D060;
-  --gold-dark:    #A8882A;
-  --gold-pale:    #FDF6DC;
-  /* ── Rosa ── */
+  /* ── Morado ── */
+  --purple:       #7B1FA2;
+  --purple-dark:  #4A148C;
+  --purple-mid:   #AB47BC;
+  --purple-light: #E1BEE7;
+  /* ── Rosa / Magenta ── */
   --pink:         #E91E8C;
   --pink-light:   #FCE4EC;
   --pink-mid:     #F48FB1;
   --pink-dark:    #C2185B;
+  --baby-pink:    #FFF0F6;
+  /* ── Dorado (acento) ── */
+  --gold:         #D4AF37;
+  --gold-light:   #F0D060;
+  --gold-dark:    #A8882A;
   /* ── Blanco / Neutros ── */
   --white:        #FFFFFF;
   --off-white:    #FAFAFA;
-  --gray-soft:    #F5F5F5;
-  --gray-text:    #6B6B6B;
+  --gray-text:    #5C4066;
   --gray-subtle:  #9E9E9E;
 }
 
@@ -27,39 +31,50 @@ html { scroll-behavior: smooth; }
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--gold-pale); }
-::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--pink-dark); }
+::-webkit-scrollbar-track { background: var(--purple-light); }
+::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--purple-dark); }
 
 /* ══ NAVBAR ══ */
 #navbar { background: transparent; }
 #navbar.scrolled {
-  background: rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.96);
   backdrop-filter: blur(14px);
-  box-shadow: 0 2px 24px rgba(212,175,55,0.18);
+  box-shadow: 0 2px 24px rgba(123,31,162,0.15);
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
 #navbar.scrolled #nav-brand,
 #navbar.scrolled .nav-link {
-  color: var(--pink-dark);
+  color: var(--purple-dark);
   text-shadow: none;
 }
 #navbar.scrolled #cart-btn {
-  background: var(--pink-light);
-  border-color: var(--pink);
-  color: var(--pink-dark);
+  background: var(--purple-light);
+  border-color: var(--purple);
+  color: var(--purple-dark);
 }
 
 /* ══ HERO ══ */
 .hero-bg {
-  background:
-    linear-gradient(135deg,
-      rgba(233,30,140,0.82) 0%,
-      rgba(194,24,91,0.72)  35%,
-      rgba(168,136,42,0.70) 70%,
-      rgba(212,175,55,0.85) 100%),
-    url('../assets/images/hero_banner.png') center/cover no-repeat;
+  background: linear-gradient(180deg,
+    #4A148C 0%,
+    #7B1FA2 18%,
+    #AB47BC 38%,
+    #E1BEE7 58%,
+    #F8BBD0 76%,
+    #FCE4EC 88%,
+    #FFFFFF 100%);
+}
+
+/* Jardín de rosas SVG en la base del hero */
+#rose-garden {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 260px;
+  z-index: 2;
+  pointer-events: none;
+  overflow: visible;
 }
 
 /* Canvas flores interactivas */
