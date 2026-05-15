@@ -57,14 +57,15 @@ html { scroll-behavior: smooth; }
 
 /* ══ HERO ══ */
 .hero-bg {
-  background: linear-gradient(180deg,
-    #4A148C 0%,
-    #7B1FA2 18%,
-    #AB47BC 38%,
-    #E1BEE7 58%,
-    #F8BBD0 76%,
-    #FCE4EC 88%,
-    #FFFFFF 100%);
+  background:
+    linear-gradient(180deg,
+      rgba(26,10,46,0.55)  0%,
+      rgba(74,20,140,0.35) 30%,
+      rgba(123,31,162,0.20)55%,
+      rgba(26,10,46,0.70)  80%,
+      rgba(10,5,20,0.90)   100%),
+    url('../assets/images/hero_banner_mj.png') center/cover no-repeat;
+  background-color: #1A0A2E;
 }
 
 /* Jardín de rosas SVG en la base del hero */

@@ -32,6 +32,8 @@ $images = @{
   "polo_amor_1778790147862"            = "polo_amor.png"
   "polo_rosas_1778790418864"           = "polo_rosas.png"
   "polo_family_1778790467920"          = "polo_family.png"
+  # LOGO Y BANNER
+  "hero_banner_mj_1778803637117"       = "hero_banner_mj.png"
 }
 
 $ok   = 0

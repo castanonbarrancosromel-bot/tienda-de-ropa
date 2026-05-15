@@ -63,7 +63,7 @@ function initRoseGarden() {
   svg.appendChild(mk('ellipse',{cx:'720',cy:'250',rx:'780',ry:'20',fill:'#1A6B1A',opacity:'0.45'}));
   svg.appendChild(mk('rect',{x:'0',y:'246',width:'1440',height:'14',fill:'url(#gnd2)'}));
 
-  const M1='#E91E8C',M2='#C2185B',P1='#FCE4EC',P2='#F48FB1';
+  const M1='#FF4DC8',M2='#E91E8C',P1='#FFE0F0',P2='#FFB3D9';
   [
     {x:55,  h:H*.72,sc:.85,r:[{dx:0,ht:1.0,r:11,c1:M1,c2:M2},{dx:-14,ht:.55,r:8,c1:P1,c2:P2},{dx:12,ht:.46,r:7,c1:M1,c2:M2}]},
     {x:175, h:H*.44,sc:.65,r:[{dx:0,ht:1.0,r:9,c1:P1,c2:P2},{dx:12,ht:.55,r:6,c1:M1,c2:M2}]},
