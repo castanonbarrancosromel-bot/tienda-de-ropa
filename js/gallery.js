@@ -103,8 +103,7 @@ function buildCard(product) {
     sale:       { cls:'badge-sale',       label:'🏷️ Oferta'     },
   };
   const badge        = badgeMap[product.badge] || null;
-  const oldPriceHtml = product.oldPrice
-    ? `<span class="product-price-old">Bs. ${product.oldPrice}</span>` : '';
+
   const sizesHtml    = product.sizes
     .map(s => `<button class="size-btn" data-size="${s}" onclick="selectSize(this,${product.id})">${s}</button>`)
     .join('');
@@ -171,10 +170,7 @@ function buildCard(product) {
       <p class="product-name">${product.name}</p>
       <p class="product-desc">${product.desc}</p>
       <div class="size-selector">${sizesHtml}</div>
-      <div class="flex items-baseline">
-        <span class="product-price">Bs. ${product.price}</span>
-        ${oldPriceHtml}
-      </div>
+
       <button class="add-cart-btn" id="add-btn-${product.id}"
               onclick="addToCartFromCard(${product.id})">
         🛍️ Agregar al Carrito
